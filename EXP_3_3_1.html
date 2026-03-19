@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>EXP_3_3_1.html</title>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+
+<style>
+body {
+    background-color: #1e1e1e;
+    color: white;
+    font-family: monospace;
+    padding: 15px;
+}
+
+.editor {
+    display: flex;
+    border: 1px solid #444;
+    height: 380px;
+}
+
+#lineNumbers {
+    background: #111;
+    color: #00ff00;
+    padding: 10px 8px;
+    margin: 0;
+    text-align: right;
+    overflow: hidden;
+    white-space: pre;
+}
+
+#code {
+    flex: 1;
+    background: #111;
+    color: white;
+    border: none;
+    padding: 10px;
+    resize: none;
+    overflow: auto;
+    white-space: pre;
+}
+
+button {
+    margin-top: 10px;
+    margin-right: 6px;
+    padding: 8px 14px;
+    background: #007acc;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#output {
+    background: #111;
+    padding: 10px;
+    margin-top: 10px;
+    min-height: 120px;
+    white-space: pre-wrap;
+}
+
+#plot {
+    margin-top: 10px;
+    border: 1px solid #555;
+    max-width: 100%;
+}
+</style>
+</head>
+
+<body>
+
+<h3>EXP_3_3_1.html</h3>
+
+<div class="editor">
+<pre id="lineNumbers"></pre>
+<textarea id="code" wrap="off">import numpy as np
+import matplotlib.pyplot as plt
+
+import matplotlib
+matplotlib.use("Agg")
+
+plt.rcParams.update({
+    'figure.facecolor': 'white',
+    'axes.facecolor': 'white',
+})
+
+
+# Define the grid
+x = np.linspace(-2, 2, 20)
+y = np.linspace(-2, 2, 20)
+X, Y = np.meshgrid(x, y)
+
+# Conservative field (gravity-like): F = r̂ / r^2
+r = np.sqrt(X**2 + Y**2)
+Fx_conservative = X / r**3
+Fy_conservative = Y / r**3
+
+# Non-conservative field (vortex-like): F = (-y, x)
+Fx_nonconservative = -Y
+Fy_nonconservative = X
+
+# ---------- Closed Path Integral ----------
+
+# Closed elliptical path
+t = np.linspace(0, 2 * np.pi, 200)
+a, b = 1.5, 1
+x_closed = a * np.cos(t)
+y_closed = b * np.sin(t)
+dx_closed = np.gradient(x_closed)
+dy_closed = np.gradient(y_closed)
+
+r_path_closed = np.sqrt(x_closed**2 + y_closed**2)
+Fx_cons_closed = x_closed / r_path_closed**3
+Fy_cons_closed = y_closed / r_path_closed**3
+Fx_noncons_closed = -y_closed
+Fy_noncons_closed = x_closed
+
+integral_cons_closed = np.trapz(Fx_cons_closed * dx_closed + Fy_cons_closed * dy_closed, t)
+integral_noncons_closed = np.trapz(Fx_noncons_closed * dx_closed + Fy_noncons_closed * dy_closed, t)
+
+# ---------- Open Path Integrals ----------
+
+# Define two paths between A and B
+# Path 1: straight line
+t1 = np.linspace(0, 1, 100)
+x1 = -1 + 2 * t1
+y1 = 1  # Constant y
+dx1 = np.gradient(x1)
+dy1 = np.gradient(np.full_like(t1, y1))
+
+# Path 2: curved arc from A to B
+t2 = np.linspace(0, np.pi, 100)
+x2 = np.cos(t2)
+y2 = np.sin(t2)
+dx2 = np.gradient(x2)
+dy2 = np.gradient(y2)
+
+# Evaluate vector fields along path 1
+r1 = np.sqrt(x1**2 + y1**2)
+Fx_cons_1 = x1 / r1**3
+Fy_cons_1 = y1 / r1**3
+Fx_noncons_1 = -y1
+Fy_noncons_1 = x1
+
+# Evaluate vector fields along path 2
+r2 = np.sqrt(x2**2 + y2**2)
+Fx_cons_2 = x2 / r2**3
+Fy_cons_2 = y2 / r2**3
+Fx_noncons_2 = -y2
+Fy_noncons_2 = x2
+
+# Line integrals
+W_cons_1 = np.trapz(Fx_cons_1 * dx1 + Fy_cons_1 * dy1, t1)
+W_cons_2 = np.trapz(Fx_cons_2 * dx2 + Fy_cons_2 * dy2, t2)
+
+W_noncons_1 = np.trapz(Fx_noncons_1 * dx1 + Fy_noncons_1 * dy1, t1)
+W_noncons_2 = np.trapz(Fx_noncons_2 * dx2 + Fy_noncons_2 * dy2, t2)
+
+# ---------- Plotting ----------
+fig, ax = plt.subplots(1, 2, figsize=(14, 6))
+
+# Conservative field
+ax[0].quiver(X, Y, Fx_conservative, Fy_conservative, color='blue')
+ax[0].plot(x_closed, y_closed, 'g', label='Closed Path')
+ax[0].plot(x1, np.full_like(x1, y1), 'r--', label='Path 1 (straight)')
+ax[0].plot(x2, y2, 'm--', label='Path 2 (arc)')
+ax[0].set_title(f"Conservative Field\n∮F·dr = {integral_cons_closed:.3f}\nW1 = {W_cons_1:.3f}, W2 = {W_cons_2:.3f}")
+ax[0].legend()
+ax[0].axis('equal')
+ax[0].grid(True)
+
+# Non-Conservative field
+ax[1].quiver(X, Y, Fx_nonconservative, Fy_nonconservative, color='orange')
+ax[1].plot(x_closed, y_closed, 'g', label='Closed Path')
+ax[1].plot(x1, np.full_like(x1, y1), 'r--', label='Path 1 (straight)')
+ax[1].plot(x2, y2, 'm--', label='Path 2 (arc)')
+ax[1].set_title(f"Non-Conservative Field\n∮F·dr = {integral_noncons_closed:.3f}\nW1 = {W_noncons_1:.3f}, W2 = {W_noncons_2:.3f}")
+ax[1].legend()
+ax[1].axis('equal')
+ax[1].grid(True)
+
+plt.tight_layout()
+
+
+# ---------- Summary ----------
+print(f"Closed Path Integrals:")
+print(f"  Conservative field:     {integral_cons_closed:.6f} (should be zero)")
+print(f"  Non-conservative field: {integral_noncons_closed:.6f} (should be nonzero)")
+
+print("\nOpen Path Integrals (A to B):")
+print(f"  Conservative field:")
+print(f"    Path 1 (straight): {W_cons_1:.6f}")
+print(f"    Path 2 (curved):   {W_cons_2:.6f}  (should match path 1)")
+
+print(f"  Non-conservative field:")
+print(f"    Path 1 (straight): {W_noncons_1:.6f}")
+print(f"    Path 2 (curved):   {W_noncons_2:.6f}  (should be different)")
+
+plt.tight_layout()
+plt.savefig("plot.png")
+plt.savefig("plot.pdf")
+plt.savefig("plot.svg")
+</textarea>
+</div>
+
+<button onclick="runCode()">Run</button>
+<button onclick="downloadPlot('png')">Download PNG</button>
+<button onclick="downloadPlot('pdf')">Download PDF</button>
+<button onclick="downloadPlot('svg')">Download SVG</button>
+
+<div id="output"></div>
+<img id="plot"/>
+
+<script>
+let pyodideReady = loadPyodide();
+let pyodide;
+
+const code = document.getElementById("code");
+const lineNumbers = document.getElementById("lineNumbers");
+
+function updateLineNumbers() {
+    const lines = code.value.split("\n").length;
+    let numbers = "";
+    for (let i = 1; i <= lines; i++) numbers += i + "\n";
+    lineNumbers.textContent = numbers;
+}
+
+code.addEventListener("input", updateLineNumbers);
+code.addEventListener("scroll", () => lineNumbers.scrollTop = code.scrollTop);
+updateLineNumbers();
+
+async function runCode() {
+    pyodide = await pyodideReady;
+
+    document.getElementById("output").innerText = "Running...";
+    document.getElementById("plot").src = "";
+
+    await pyodide.loadPackage(["numpy","matplotlib"]);
+
+    try {
+        await pyodide.runPythonAsync(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+`);
+
+        await pyodide.runPythonAsync(code.value);
+        let output = await pyodide.runPythonAsync("sys.stdout.getvalue()");
+        document.getElementById("output").innerText = output;
+
+        let img = pyodide.FS.readFile("plot.png", {encoding:"binary"});
+        let blob = new Blob([img], {type:"image/png"});
+        document.getElementById("plot").src = URL.createObjectURL(blob);
+
+    } catch(err) {
+        document.getElementById("output").innerText = err;
+    }
+}
+
+function downloadPlot(format) {
+    try {
+        let file = pyodide.FS.readFile("plot." + format, {encoding:"binary"});
+        let blob = new Blob([file], {type:"application/octet-stream"});
+        let link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "plot." + format;
+        link.click();
+    } catch(err) {
+        alert("Run the code successfully first.");
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>EXP_3_4_2.html</title>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+
+<style>
+body {
+    background-color: #1e1e1e;
+    color: white;
+    font-family: monospace;
+    padding: 15px;
+}
+
+.editor {
+    display: flex;
+    border: 1px solid #444;
+    height: 320px;
+}
+
+#lineNumbers {
+    background: #111;
+    color: #00ff00;
+    padding: 10px 8px;
+    margin: 0;
+    text-align: right;
+    overflow: hidden;
+    white-space: pre;
+}
+
+#code {
+    flex: 1;
+    background: #111;
+    color: white;
+    border: none;
+    padding: 10px;
+    resize: none;
+    overflow: auto;
+    white-space: pre;
+}
+
+button {
+    margin-top: 10px;
+    padding: 8px 14px;
+    background: #007acc;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#output {
+    background: #111;
+    padding: 10px;
+    margin-top: 10px;
+    min-height: 80px;
+    white-space: pre-wrap;
+}
+</style>
+</head>
+
+<body>
+
+<h3>EXP_3_4_2.html</h3>
+
+<div class="editor">
+<pre id="lineNumbers"></pre>
+<textarea id="code" wrap="off">def one_dimensional_collision(m1, v1, m2, v2, e):
+    """
+    Solves one-dimensional elastic collision between two objects.
+    
+    Parameters:
+        m1 (float): Mass of object 1.
+        v1 (float): Initial velocity of object 1.
+        m2 (float): Mass of object 2.
+        v2 (float): Initial velocity of object 2.
+        e (float): Coefficient of restitution (between 0 and 1).
+        
+    Returns:
+        v1f (float): Final velocity of object 1.
+        v2f (float): Final velocity of object 2.
+    """
+    # Conservation of momentum
+    p1 = m1 * v1
+    p2 = m2 * v2
+    total_initial_momentum = p1 + p2
+    
+    # Using the formula for elastic collision
+    v1f = ((m1 - e * m2) * v1 + (1 + e) * m2 * v2) / (m1 + m2)
+    v2f = ((m2 - e * m1) * v2 + (1 + e) * m1 * v1) / (m1 + m2)
+    
+    return v1f, v2f
+
+# Example usage:
+m1 = 1  # mass of object 1
+v1 = 1.2  # initial velocity of object 1
+m2 = 1.0  # mass of object 2
+v2 = -0.2  # initial velocity of object 2
+e = 0.8  # coefficient of restitution
+
+v1f, v2f = one_dimensional_collision(m1, v1, m2, v2, e)
+print("Final velocity of object 1:", v1f)
+print("Final velocity of object 2:", v2f)
+</textarea>
+</div>
+
+<button onclick="runCode()">Run</button>
+
+<div id="output"></div>
+
+<script>
+let pyodideReady = loadPyodide();
+let pyodide;
+
+const code = document.getElementById("code");
+const lineNumbers = document.getElementById("lineNumbers");
+
+function updateLineNumbers() {
+    const lines = code.value.split("\n").length;
+    let numbers = "";
+    for (let i = 1; i <= lines; i++) numbers += i + "\n";
+    lineNumbers.textContent = numbers;
+}
+
+code.addEventListener("input", updateLineNumbers);
+code.addEventListener("scroll", () => lineNumbers.scrollTop = code.scrollTop);
+updateLineNumbers();
+
+async function runCode() {
+    pyodide = await pyodideReady;
+
+    document.getElementById("output").innerText = "Running...";
+
+    try {
+        await pyodide.runPythonAsync(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+`);
+
+        await pyodide.runPythonAsync(code.value);
+        let output = await pyodide.runPythonAsync("sys.stdout.getvalue()");
+        document.getElementById("output").innerText = output;
+
+    } catch(err) {
+        document.getElementById("output").innerText = err;
+    }
+}
+</script>
+
+</body>
+</html>

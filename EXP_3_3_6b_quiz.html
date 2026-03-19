@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>EXP_3_3_6b_quiz.html</title>
+<style>
+body {
+    background-color: #1e1e1e;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    width: 650px;
+    margin: 40px auto;
+    background: #222;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.question {
+    margin-bottom: 12px;
+    font-weight: bold;
+}
+
+.option {
+    margin: 5px 0;
+}
+
+.feedback {
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+.correct { color: #00ff88; }
+.incorrect { color: #ff4c4c; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<div id="quiz"></div>
+<div id="finalScore" style="margin-top:20px; font-weight:bold;"></div>
+</div>
+
+<script>
+
+const questions = [{"question": "The new energy budget will be", "options": [{"text": "m_Rgh = 1/2 m_Ru_R^2 + 1/2 m_Lu_L^2 + \u03bcm_Lgh", "correct": true}, {"text": "m_Lgh = 1/2 m_Ru_R^2 + 1/2 m_Lu_L^2 + \u03bcm_Rgh", "correct": false}, {"text": "m_Rgh = 1/2 m_Ru_R^2 + 1/2 m_Lu_L^2 + \u03bcm_Rgh", "correct": false}, {"text": "1/2 m_Ru_R^2 + 1/2 m_Lu_L^2 + \u03bcm_Rgh = 0", "correct": false}, {"text": "None of these", "correct": false}]}, {"question": "The new landing speed will be about", "options": [{"text": "u = 4.4 m/s", "correct": true}, {"text": "u = 4.5 m/s", "correct": false}, {"text": "u = 4.3 m/s", "correct": false}, {"text": "u = 4.6 m/s", "correct": false}, {"text": "None of these", "correct": false}]}];
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function renderQuiz() {
+    const quizDiv = document.getElementById("quiz");
+    quizDiv.innerHTML = "";
+
+    questions.forEach((q, index) => {
+        shuffle(q.options);
+        const letters = "ABCDE";
+
+        const qBlock = document.createElement("div");
+
+        const qTitle = document.createElement("div");
+        qTitle.className = "question";
+        qTitle.innerHTML = (index+1) + ". " + q.question;
+        qBlock.appendChild(qTitle);
+
+        q.options.forEach((opt, i) => {
+            const optDiv = document.createElement("div");
+            optDiv.className = "option";
+            optDiv.innerHTML = `
+                <label>
+                    <input type="radio" name="q${index}" value="${i}" onclick="checkAnswer(${index}, ${i})">
+                    ${letters[i]}) ${opt.text}
+                </label>
+            `;
+            qBlock.appendChild(optDiv);
+        });
+
+        const feedbackDiv = document.createElement("div");
+        feedbackDiv.id = "feedback" + index;
+        feedbackDiv.className = "feedback";
+        qBlock.appendChild(feedbackDiv);
+
+        quizDiv.appendChild(qBlock);
+    });
+}
+
+let score = 0;
+let answered = new Array(questions.length).fill(false);
+
+function checkAnswer(qIndex, optIndex) {
+    const feedback = document.getElementById("feedback" + qIndex);
+
+    if (!answered[qIndex]) {
+        answered[qIndex] = true;
+
+        if (questions[qIndex].options[optIndex].correct) {
+            feedback.innerHTML = "✅ Correct!";
+            feedback.className = "feedback correct";
+            score++;
+        } else {
+            feedback.innerHTML = "❌ Incorrect.";
+            feedback.className = "feedback incorrect";
+        }
+    }
+
+    if (answered.every(a => a)) {
+        document.getElementById("finalScore").innerHTML =
+            "Final Score: " + score + " / " + questions.length;
+    }
+}
+
+renderQuiz();
+
+</script>
+
+</body>
+</html>

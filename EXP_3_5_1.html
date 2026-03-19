@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>EXP_3_5_1.html</title>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+
+<style>
+body {
+    background-color: #1e1e1e;
+    color: white;
+    font-family: monospace;
+    padding: 15px;
+}
+
+.editor {
+    display: flex;
+    border: 1px solid #444;
+    height: 320px;
+}
+
+#lineNumbers {
+    background: #111;
+    color: #00ff00;
+    padding: 10px 8px;
+    margin: 0;
+    text-align: right;
+    overflow: hidden;
+    white-space: pre;
+}
+
+#code {
+    flex: 1;
+    background: #111;
+    color: white;
+    border: none;
+    padding: 10px;
+    resize: none;
+    overflow: auto;
+    white-space: pre;
+}
+
+button {
+    margin-top: 10px;
+    padding: 8px 14px;
+    background: #007acc;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#output {
+    background: #111;
+    padding: 10px;
+    margin-top: 10px;
+    min-height: 100px;
+    white-space: pre-wrap;
+}
+</style>
+</head>
+
+<body>
+
+<h3>EXP_3_5_1.html</h3>
+
+<div class="editor">
+<pre id="lineNumbers"></pre>
+<textarea id="code" wrap="off">import numpy as np
+
+# Constants
+G = 6.67430e-11            # Gravitational constant [m^3 / kg / s^2]
+M_earth = 5.972e24         # Mass of Earth [kg]
+R_earth = 6371e3           # Radius of Earth [m]
+
+def vis_viva(r, a):
+    """Computes speed using the Vis-Viva equation."""
+    return np.sqrt(G * M_earth * (2/r - 1/a))
+
+# --- User-defined ISS parameters (from public NASA data) ---
+altitude_iss_km =                    # in kilometers
+official_speed_iss_kms =           # NASA value in km/s
+
+# Convert to SI units
+r_iss = (R_earth + altitude_iss_km * 1e3)     # current radius [m]
+a_iss = r_iss                                # circular orbit => a = r
+
+# Compute Vis-Viva speed
+v_iss = vis_viva(r_iss, a_iss)               # result in m/s
+v_iss_kms = v_iss / 1e3                      # convert to km/s
+
+# Compare with official value
+error = v_iss_kms - official_speed_iss_kms
+percent_error = (error / official_speed_iss_kms) * 100
+
+# Display Results
+print(f"--- ISS Speed Check using Vis-Viva ---")
+print(f"Altitude of ISS:           {altitude_iss_km} km")
+print(f"Computed speed:            {v_iss_kms:.3f} km/s")
+print(f"NASA official speed:       {official_speed_iss_kms:.3f} km/s")
+print(f"Difference:                {error:.3f} km/s")
+print(f"Percent error:             {percent_error:.3f}%")
+</textarea>
+</div>
+
+<button onclick="runCode()">Run</button>
+
+<div id="output"></div>
+
+<script>
+let pyodideReady = loadPyodide();
+let pyodide;
+
+const codeEl = document.getElementById("code");
+const lineNumbers = document.getElementById("lineNumbers");
+
+function updateLineNumbers() {
+    const lines = codeEl.value.split("\n").length;
+    let nums = "";
+    for (let i = 1; i <= lines; i++) nums += i + "\n";
+    lineNumbers.textContent = nums;
+}
+
+codeEl.addEventListener("input", updateLineNumbers);
+codeEl.addEventListener("scroll", () => lineNumbers.scrollTop = codeEl.scrollTop);
+updateLineNumbers();
+
+async function runCode() {
+    pyodide = await pyodideReady;
+
+    document.getElementById("output").innerText = "Running...";
+
+    await pyodide.loadPackage(["numpy"]);
+
+    try {
+        await pyodide.runPythonAsync(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+`);
+
+        await pyodide.runPythonAsync(codeEl.value);
+
+        let out = await pyodide.runPythonAsync("sys.stdout.getvalue()");
+        document.getElementById("output").innerText = out;
+
+    } catch(err) {
+        document.getElementById("output").innerText = err;
+    }
+}
+</script>
+
+</body>
+</html>

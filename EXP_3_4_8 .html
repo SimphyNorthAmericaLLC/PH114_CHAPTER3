@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>EXP_3_4_8.html</title>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+
+<style>
+body {
+  background-color:#1e1e1e;
+  color:white;
+  font-family: monospace;
+  padding:15px;
+}
+.editor {
+  display:flex;
+  border:1px solid #444;
+  height:320px;
+}
+#lineNumbers {
+  background:#111;
+  color:#00ff00;
+  padding:10px 8px;
+  margin:0;
+  text-align:right;
+  overflow:hidden;
+  white-space:pre;
+}
+#code {
+  flex:1;
+  background:#111;
+  color:white;
+  border:none;
+  padding:10px;
+  resize:none;
+  overflow:auto;
+  white-space:pre;
+}
+button {
+  margin-top:10px;
+  margin-right:6px;
+  padding:8px 14px;
+  background:#007acc;
+  color:white;
+  border:none;
+  cursor:pointer;
+}
+#output {
+  background:#111;
+  padding:10px;
+  margin-top:10px;
+  min-height:90px;
+  white-space:pre-wrap;
+}
+#plot {
+  margin-top:10px;
+  border:1px solid #555;
+  max-width:100%;
+  background:white;
+}
+</style>
+</head>
+
+<body>
+<h3>EXP_3_4_8.html</h3>
+
+<div class="editor">
+  <pre id="lineNumbers"></pre>
+  <textarea id="code" wrap="off">import numpy as np
+import matplotlib.pyplot as plt
+
+import matplotlib
+matplotlib.use("Agg")
+
+plt.rcParams.update({
+    'figure.facecolor': 'white',
+    'axes.facecolor': 'white',
+})
+
+
+# Define parameters
+h1 = 5  # Initial height (m)
+e = 0.8  # Coefficient of restitution
+num_bounces = 10  # Number of bounces to consider
+dt = 0.01  # Time step (s)
+
+# Compute total vertical distance
+def compute_total_distance(h1, e, num_bounces):
+    total_distance = h1  # Initial drop
+    h = h1
+    
+    for i in range(1, num_bounces + 1):
+        h *= e ** 2  # New bounce height
+        total_distance += 2 * h  # Only count the upward and downward travel after first drop
+    
+    return total_distance
+
+# Compute total distance covered
+total_distance = compute_total_distance(h1, e, num_bounces)
+print(f"Total vertical distance covered: {total_distance:.2f} m")
+
+# Plotting bounce heights
+bounces = np.arange(1, num_bounces + 1)
+heights = [h1 * (e ** (2 * i)) for i in range(num_bounces)]
+
+t_values = np.arange(0, num_bounces, 1)
+plt.figure(figsize=(8, 6))
+plt.plot(bounces, heights, marker='o', linestyle='-')
+plt.xlabel('Bounce Number')
+plt.ylabel('Height Reached (m)')
+plt.title('Bounce Heights Over Time')
+plt.grid(True)
+
+
+plt.tight_layout()
+plt.savefig("plot.png")
+plt.savefig("plot.pdf")
+plt.savefig("plot.svg")
+</textarea>
+</div>
+
+<button onclick="runCode()">Run</button>
+<button onclick="downloadPlot('png')">Download PNG</button>
+<button onclick="downloadPlot('pdf')">Download PDF</button>
+<button onclick="downloadPlot('svg')">Download SVG</button>
+
+<div id="output"></div>
+<img id="plot"/>
+
+<script>
+let pyodideReady = loadPyodide();
+let pyodide;
+
+const codeEl = document.getElementById("code");
+const lineNumbers = document.getElementById("lineNumbers");
+
+function updateLineNumbers() {
+  const lines = codeEl.value.split("\n").length;
+  let nums = "";
+  for (let i=1;i<=lines;i++) nums += i + "\n";
+  lineNumbers.textContent = nums;
+}
+codeEl.addEventListener("input", updateLineNumbers);
+codeEl.addEventListener("scroll", () => lineNumbers.scrollTop = codeEl.scrollTop);
+updateLineNumbers();
+
+async function runCode() {
+  pyodide = await pyodideReady;
+  document.getElementById("output").innerText = "Running...";
+  document.getElementById("plot").src = "";
+
+  await pyodide.loadPackage(["numpy","matplotlib"]);
+
+  try {
+    await pyodide.runPythonAsync(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+`);
+
+    await pyodide.runPythonAsync(codeEl.value);
+    let out = await pyodide.runPythonAsync("sys.stdout.getvalue()");
+    document.getElementById("output").innerText = out;
+
+    // Render plot if it exists
+    try {
+      let img = pyodide.FS.readFile("plot.png", {encoding:"binary"});
+      let blob = new Blob([img], {type:"image/png"});
+      document.getElementById("plot").src = URL.createObjectURL(blob);
+    } catch(e) {}
+
+  } catch(err) {
+    document.getElementById("output").innerText = err;
+  }
+}
+
+function downloadPlot(ext) {
+  try {
+    let data = pyodide.FS.readFile("plot." + ext, {encoding:"binary"});
+    let blob = new Blob([data], {type:"application/octet-stream"});
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "plot." + ext;
+    a.click();
+  } catch(e) {
+    alert("Run the code successfully first.");
+  }
+}
+</script>
+
+</body>
+</html>

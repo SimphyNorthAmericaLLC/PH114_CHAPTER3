@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>EXP_3_1_4.html</title>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+
+<style>
+body {
+    background-color: #1e1e1e;
+    color: white;
+    font-family: monospace;
+    padding: 15px;
+}
+
+.editor {
+    display: flex;
+    border: 1px solid #444;
+    height: 280px;
+}
+
+#lineNumbers {
+    background: #111;
+    color: #00ff00;
+    padding: 10px 8px;
+    margin: 0;
+    text-align: right;
+    overflow: hidden;
+    white-space: pre;
+}
+
+#code {
+    flex: 1;
+    background: #111;
+    color: white;
+    border: none;
+    padding: 10px;
+    resize: none;
+    overflow: auto;
+    white-space: pre;
+}
+
+button {
+    margin-top: 10px;
+    padding: 8px 14px;
+    background: #007acc;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#output {
+    background: #111;
+    padding: 10px;
+    margin-top: 10px;
+    min-height: 60px;
+    white-space: pre-wrap;
+}
+</style>
+</head>
+
+<body>
+
+<h3>EXP_3_1_4.html</h3>
+
+<div class="editor">
+<pre id="lineNumbers"></pre>
+<textarea id="code" wrap="off">from scipy.optimize import fsolve
+
+# Define the equation to solve: 3 = t + t^2 + (0.025/3) * t^3
+def equation(t):
+    return t + t**2 + (0.025/3) * t**3 - 3
+
+# Solve for t
+t_solution = fsolve(equation, 1)  # Initial guess: 1
+
+# Print the solution
+print("Solution for t:", t_solution[0])
+</textarea>
+</div>
+
+<button onclick="runCode()">Run</button>
+
+<div id="output"></div>
+
+<script>
+let pyodideReady = loadPyodide();
+let pyodide;
+
+const code = document.getElementById("code");
+const lineNumbers = document.getElementById("lineNumbers");
+
+function updateLineNumbers() {
+    const lines = code.value.split("\n").length;
+    let numbers = "";
+    for (let i = 1; i <= lines; i++) numbers += i + "\n";
+    lineNumbers.textContent = numbers;
+}
+
+code.addEventListener("input", updateLineNumbers);
+code.addEventListener("scroll", () => lineNumbers.scrollTop = code.scrollTop);
+updateLineNumbers();
+
+async function runCode() {
+    pyodide = await pyodideReady;
+    document.getElementById("output").innerText = "Running...";
+
+    await pyodide.loadPackage(["numpy","scipy"]);
+
+    try {
+        await pyodide.runPythonAsync(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+`);
+
+        await pyodide.runPythonAsync(code.value);
+        let output = await pyodide.runPythonAsync("sys.stdout.getvalue()");
+        document.getElementById("output").innerText = output;
+    } catch(err) {
+        document.getElementById("output").innerText = err;
+    }
+}
+</script>
+
+</body>
+</html>

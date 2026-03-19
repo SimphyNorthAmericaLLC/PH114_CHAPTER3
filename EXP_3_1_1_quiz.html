@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>EXP_3_1_1_quiz</title>
+
+<style>
+body {
+    background-color: #1e1e1e;
+    color: white;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    width: 650px;
+}
+
+.question {
+    margin-bottom: 25px;
+    padding: 18px;
+    background: #2a2a2a;
+    border-radius: 8px;
+}
+
+.answers button {
+    display: block;
+    margin: 6px 0;
+    padding: 8px 12px;
+    width: 100%;
+    background: #007acc;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    text-align: left;
+}
+
+.answers button:hover {
+    background: #005f99;
+}
+
+.correct {
+    background: #2e7d32 !important;
+}
+
+.wrong {
+    background: #c62828 !important;
+}
+
+#score {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h2>EXP_3_1_1 Quiz</h2>
+<div id="quiz"></div>
+<div id="score"></div>
+</div>
+
+<script>
+
+let questions = [
+{
+question: `The box has a velocity that is`,
+options: [
+{text: `constantly increasing magnitude`, correct: true},
+{text: `constantly changing direction`, correct: false},
+{text: `constant in magnitude but not direction`, correct: false},
+{text: `constantly increasing magnitude but not constant direction`, correct: false},
+{text: `None of these apply`, correct: false},
+]
+},
+{
+question: `While the force is acting on the object its acceleration is`,
+options: [
+{text: `constantly increasing magnitude`, correct: false},
+{text: `constantly changing direction`, correct: false},
+{text: `constant in magnitude but not direction`, correct: false},
+{text: `constantly increasing magnitude but constant direction`, correct: false},
+{text: `None of these apply`, correct: true},
+]
+},
+{
+question: `The effect of larger ‘dt’ in the simulation would make the final result`,
+options: [
+{text: `Less accurate`, correct: true},
+{text: `More accurate`, correct: false},
+{text: `None of these apply`, correct: false},
+]
+},
+{
+question: `The acceleration of the object depends on`,
+options: [
+{text: `Mass of the box, the exerted force magnitude and direction`, correct: true},
+{text: `Mass of the box, the exerted force magnitude only`, correct: false},
+{text: `Mass of the box, the exerted force’s direction`, correct: false},
+{text: `Mass of the box`, correct: false},
+{text: `None of these apply`, correct: false},
+]
+},
+{
+question: `If the box had initial kinetic energy of 1 Joule and our force of 2 N produces a work across 3 meters then the final kinetic energy would be`,
+options: [
+{text: `7 J`, correct: true},
+{text: `6 J`, correct: false},
+{text: `5 J`, correct: false},
+{text: `4 J`, correct: false},
+{text: `None of these apply`, correct: false},
+]
+},
+
+];
+
+const quizDiv = document.getElementById("quiz");
+let score = 0;
+let answered = 0;
+
+questions.forEach((q, index) => {
+
+    q.options.sort(() => Math.random() - 0.5);
+
+    const questionDiv = document.createElement("div");
+    questionDiv.className = "question";
+
+    const questionText = document.createElement("p");
+    questionText.innerHTML = "<strong>" + (index+1) + ". " + q.question + "</strong>";
+    questionDiv.appendChild(questionText);
+
+    const answersDiv = document.createElement("div");
+    answersDiv.className = "answers";
+
+    q.options.forEach(option => {
+        const btn = document.createElement("button");
+        btn.innerText = option.text;
+
+        btn.onclick = () => {
+            if (btn.classList.contains("correct") || btn.classList.contains("wrong")) return;
+
+            if (option.correct) {
+                btn.classList.add("correct");
+                score++;
+            } else {
+                btn.classList.add("wrong");
+            }
+
+            answered++;
+            if (answered === questions.length) {
+                document.getElementById("score").innerText =
+                    "Final Score: " + score + " / " + questions.length;
+            }
+        };
+
+        answersDiv.appendChild(btn);
+    });
+
+    questionDiv.appendChild(answersDiv);
+    quizDiv.appendChild(questionDiv);
+});
+
+</script>
+
+</body>
+</html>

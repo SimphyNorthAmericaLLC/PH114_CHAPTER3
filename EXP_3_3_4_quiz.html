@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>EXP_3_2_3_quiz</title>
+<style>
+body {
+    background-color: #1e1e1e;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+.container {
+    width: 650px;
+    margin: auto;
+}
+.question {
+    margin-bottom: 22px;
+}
+button {
+    padding: 6px 12px;
+    margin-top: 5px;
+}
+.correct { color: #00ff88; }
+.incorrect { color: #ff5555; }
+</style>
+</head>
+<body>
+<div class="container">
+<h2>EXP_3_2_3 Quiz</h2>
+<div id="quiz"></div>
+<div id="score"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    "q": "According to Simphy, the distance the object covers before hitting the spring is about",
+    "options": [
+      "5.8 m",
+      "5.4 m",
+      "4.5 m",
+      "8.8 m",
+      "5.2.2 m"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "The maximum compression D was calculated from theory as",
+    "options": [
+      "0.56 m",
+      "0.64 m",
+      "0.48 m",
+      "0.70 m",
+      "0.32 m"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "The maximum compression D was estimated by Simphy about",
+    "options": [
+      "0.56 m",
+      "0.64 m",
+      "0.48 m",
+      "0.70 m",
+      "0.32 m"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "A box moves on a rough horizontal surface with initial speed. The amount of heat released into the environment when the box stops",
+    "options": [
+      "Is NOT dependent on the friction coefficient",
+      "Is dependent on the friction coefficient",
+      "More information is required"
+    ],
+    "answer": 0
+  }
+];
+
+let score = 0;
+let answered = 0;
+
+function shuffle(array){
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function loadQuiz(){
+    const quizDiv = document.getElementById("quiz");
+    questions.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "question";
+        const q = document.createElement("p");
+        q.textContent = (index+1) + ". " + item.q;
+        div.appendChild(q);
+
+        let opts = item.options.map((opt,i)=>({text:opt, correct:i===item.answer}));
+        shuffle(opts);
+
+        opts.forEach(opt=>{
+            const btn = document.createElement("button");
+            btn.textContent = opt.text;
+            btn.onclick = function(){
+                if(btn.disabled) return;
+                answered++;
+                if(opt.correct){
+                    btn.className="correct";
+                    score++;
+                } else {
+                    btn.className="incorrect";
+                }
+                div.querySelectorAll("button").forEach(b=>b.disabled=true);
+                if(answered===questions.length){
+                    document.getElementById("score").innerHTML = 
+                        "<h3>Final Score: " + score + " / " + questions.length + "</h3>";
+                }
+            };
+            div.appendChild(btn);
+            div.appendChild(document.createElement("br"));
+        });
+
+        quizDiv.appendChild(div);
+    });
+}
+
+loadQuiz();
+</script>
+
+</body>
+</html>
