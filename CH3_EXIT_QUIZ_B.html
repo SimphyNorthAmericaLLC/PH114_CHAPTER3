@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Momentum & Collisions Quiz — Restart on Wrong</title>
+<style>
+  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; line-height: 1.45; margin: 0; padding: 24px; background: #0b0b0b; color: #f2f2f2; }
+  #quiz2 { max-width: 760px; margin: 0 auto; }
+  #q2_stem { margin: .5rem 0 1rem; font-size: 1.05rem; }
+  #q2_options { display: grid; gap: .5rem; }
+  .q2_option { border: 1px solid #333; border-radius: 10px; padding: .6rem .8rem; cursor: pointer; text-align: left; background:#121212; }
+  .q2_option:hover { background: #161616; }
+  #q2_feedback { margin-top: .9rem; min-height: 1.2rem; color:#aaa; }
+  #q2_nav { margin-top: 1rem; display: flex; gap: .6rem; }
+  button { padding: .55rem .9rem; border-radius: 10px; border: 1px solid #333; background: #1b1b1b; color: #f2f2f2; cursor: pointer; }
+</style>
+</head>
+<body>
+  <div id="quiz2">
+    <h3 id="q2_progress"></h3>
+    <div id="q2_stem"></div>
+    <div id="q2_options"></div>
+    <div id="q2_feedback"></div>
+    <div id="q2_nav">
+      <button id="q2_restart" style="margin-left:auto;">Restart</button>
+    </div>
+  </div>
+
+<script>
+/* Exact wording preserved. Option order exactly as provided (no shuffling). */
+const quiz2 = [
+  {
+    stem: "A ball lands vertically on the ground and bounces back. The momentum of the ball is a) conserved during the collision, b) before and after the collision, c) before, after, and during the collision, d) never.",
+    choices: ["conserved during the collision","before and after the collision","before, after, and during the collision","never"],
+    correctIndex: 3
+  },
+  {
+    stem: "A ball lands vertically on the ground and bounces back. The momentum of the ball+ground system is a) conserved during the collision, b) before and after the collision, c) before, after, and during the collision, d) never.",
+    choices: ["conserved during the collision","before and after the collision","before, after, and during the collision","never"],
+    correctIndex: 0
+  },
+  {
+    stem: "A ball hits a vertical wall and bounces back. The horizontal momentum of the ball is a) conserved during the collision, b) before and after the collision, c) before, after, and during the collision, d) never.",
+    choices: ["conserved during the collision","before and after the collision","before, after, and during the collision","never"],
+    correctIndex: 3
+  },
+  {
+    stem: "A ball hits a vertical wall on frictionless rollers and bounces back. The horizontal momentum of the ball+wall system is a) conserved during the collision, b) before and after the collision, c) before, after, and during the collision, d) never.",
+    choices: ["conserved during the collision","before and after the collision","before, after, and during the collision","never"],
+    correctIndex: 2
+  },
+  {
+    stem: "You are on a small boat and you walk from left to right. The boat will move: a) toward the same direction as you b) the opposite direction than you c) will not move at all",
+    choices: ["toward the same direction as you","the opposite direction than you","will not move at all"],
+    correctIndex: 1
+  },
+  {
+    stem: "You are on a small boat and you walk from left to right. The reason the boat moves is because:  a) all involved forces are action-reaction b) the system’s momentum is conserved c) all of these d) none of these",
+    choices: ["all involved forces are action-reaction","the system’s momentum is conserved","all of these","none of these"],
+    correctIndex: 2
+  },
+  {
+    stem: "Two objects hanging from a pulley are left to move. It is a fact that the two mass systems’ momentum will: a) be conserved b) not be conserved",
+    choices: ["be conserved","not be conserved"],
+    correctIndex: 1
+  },
+  {
+    stem: "Two boxes collide with each other on a rough horizontal surface. The system’s momentum will be conserved: a) before, during, and after the collision b) before and after c) during d) will never be conserved",
+    choices: ["before, during, and after the collision","before and after","during","will never be conserved"],
+    correctIndex: 2
+  },
+  {
+    stem: "Two boxes collide with each other on a smooth inclined surface. The system’s momentum will be conserved: a) before, during, and after the collision b) before and after c) during d) will never be conserved",
+    choices: ["before, during, and after the collision","before and after","during","will never be conserved"],
+    correctIndex: 2
+  },
+  {
+    stem: "In scenario A, a car hits a brick wall with speed V and comes to a full stop during time T. In scenario B, two identical cars (like in scenario A) collide at the same speed V and come to a full stop also during time T. All else being equal, the damage on the car(s) will be in a) higher in scenario A, b) higher in scenario B, c) the same in both scenarios.",
+    choices: ["higher in scenario A","higher in scenario B","the same in both scenarios"],
+    correctIndex: 2
+  }
+];
+
+const els = {
+  progress: document.getElementById('q2_progress'),
+  stem: document.getElementById('q2_stem'),
+  options: document.getElementById('q2_options'),
+  feedback: document.getElementById('q2_feedback'),
+  restart: document.getElementById('q2_restart'),
+};
+
+let idx = 0;
+let score = 0;
+
+function render() {
+  const total = quiz2.length;
+  els.progress.textContent = `Question ${idx+1} of ${total}  ·  Score: ${score}/${total}`;
+  els.stem.textContent = quiz2[idx].stem;
+  els.options.innerHTML = '';
+  els.feedback.textContent = '';
+
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  quiz2[idx].choices.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'q2_option';
+    btn.type = 'button';
+    btn.innerHTML = `<strong>${letters[i]})</strong> ${text}`;
+    btn.addEventListener('click', () => handleChoice(i));
+    els.options.appendChild(btn);
+  });
+}
+
+function handleChoice(i) {
+  const correct = quiz2[idx].correctIndex;
+  if (i === correct) {
+    score++;
+    els.feedback.textContent = 'Correct.';
+    setTimeout(() => {
+      idx++;
+      if (idx < quiz2.length) {
+        render();
+      } else {
+        els.progress.textContent = `Completed · Final Score: ${score}/${quiz2.length}`;
+        els.stem.textContent = 'Quiz finished.';
+        els.options.innerHTML = '';
+        els.feedback.textContent = 'Press Restart to try again.';
+      }
+    }, 600);
+  } else {
+    els.feedback.textContent = 'Incorrect — restarting from Question 1…';
+    setTimeout(() => { idx = 0; score = 0; render(); }, 700);
+  }
+}
+
+els.restart.addEventListener('click', () => { idx = 0; score = 0; render(); });
+render();
+</script>
+</body>
+</html>
