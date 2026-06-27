@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CH3 Exit Quiz A — Restart on Wrong</title>
+<style>
+body{font-family:system-ui,sans-serif;line-height:1.45;margin:0;padding:24px;background:radial-gradient(circle at top,#1b2745,#090a0f);color:#f2f2f2}#quiz2{max-width:760px;margin:auto;background:#121212;border:1px solid #2c2c2c;border-radius:18px;padding:24px;box-shadow:0 0 25px rgba(0,0,0,.4)}.quiz-header{text-align:center;margin-bottom:18px}.subtitle{color:#9fdcff}.progress-wrap{width:100%;height:10px;background:#222;border-radius:20px;overflow:hidden;margin-bottom:18px}#progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#00d4ff,#00ff99)}#q2_stem{margin:.8rem 0 1rem;font-size:1.08rem;font-weight:500}.q2_option{border:1px solid #333;border-radius:12px;padding:14px;background:#181818;cursor:pointer}.q2_option:hover{border-color:#00d4ff}.correct{color:#00ff88}.incorrect{color:#ff6666}
+</style>
+</head>
+<body>
+  <div id="quiz2"><div class="quiz-header"><h1>PH114 Exit Quiz</h1><div class="subtitle">Work, Energy & Collisions</div></div><div class="progress-wrap"><div id="progress-bar"></div></div>
+    <h3 id="q2_progress"></h3>
+    <div id="q2_stem"></div>
+    <div id="q2_options"></div>
+    <div id="q2_feedback"></div>
+    <div id="q2_nav">
+      <button id="q2_restart" style="margin-left:auto;">Restart</button>
+    </div>
+  </div>
+
+<script>
+/* Exact wording preserved. Option order is exactly as provided (no shuffling). */
+const quiz2 = [
+  {
+    "stem": "A box has initial kinetic energy and moving on a rough surface with friction coefficient k. When the box comes to a full stop, the total amount of heat which will be released from the conversion of kinetic energy will ____dependent on k",
+    "choices": [
+      "be",
+      "not be",
+      "more information is needed"
+    ],
+    "correctIndex": 1
+  },
+  {
+    "stem": "A box has initial kinetic energy and moves along on a rough horizontal surface with friction coefficient k. When the box comes to a full stop, the total distance covered will only be dependent on",
+    "choices": [
+      "the initial energy and k",
+      "k only",
+      "more information is needed"
+    ],
+    "correctIndex": 0
+  },
+  {
+    "stem": "A projectile is launched at an angle. At the top of its trajectory, its kinetic energy is",
+    "choices": [
+      "minimum but not zero",
+      "zero",
+      "maximum",
+      "exactly half than the initial"
+    ],
+    "correctIndex": 0
+  },
+  {
+    "stem": "A box is moving with speed V along a horizontal smooth surface (no friction) and compresses by a distance X a spring of constant K. Based on the conservation of energy, X depends on",
+    "choices": [
+      "V and K",
+      "K only",
+      "V only",
+      "None of these"
+    ],
+    "correctIndex": 0
+  },
+  {
+    "stem": "A box is moving with speed V along a horizontal smooth surface (no friction) and compresses by a distance X a spring of constant K. Based on the conservation of energy, the spring's potential energy will be",
+    "choices": [
+      "dependent on K",
+      "independent of K",
+      "more information is needed"
+    ],
+    "correctIndex": 1
+  },
+  {
+    "stem": "An object slides (from rest) down an inclined plane of angle Z with no friction. The speed at the bottom of the plane is",
+    "choices": [
+      "dependent on Z",
+      "independent of Z",
+      "more information is needed"
+    ],
+    "correctIndex": 1
+  },
+  {
+    "stem": "A projectile is launched from the ground at an angle. The mechanical (kinetic + potential due to height) energy of the projectile when friction is absent is conserved at any point of its trajectory. Is this statement",
+    "choices": [
+      "true",
+      "false",
+      "more information is needed"
+    ],
+    "correctIndex": 0
+  },
+  {
+    "stem": "An object of mass m1 lies on a horizontal surface with friction and is connected with a massless and inextensible string to a pulley from which another less massive object m2 (m1>m2) is hanging vertically. If the system is moving then the accelerations of m1 and m2 will be",
+    "choices": [
+      "a1=a2>0",
+      "a1>a2",
+      "a1<a2",
+      "a1=a2=0"
+    ],
+    "correctIndex": 0
+  },
+  {
+    "stem": "A cart is pulled by a vertically hanging weight via a simple pulley. The speed of the cart depends on:",
+    "choices": [
+      "only the mass of the hanging weight",
+      "only the mass of the cart",
+      "both the mass of the cart and the mass of the hanging weight",
+      "nothing. Masses have nothing to do with the cart’s speed"
+    ],
+    "correctIndex": 2
+  },
+  {
+    "stem": "The work that it takes to push a box straight up to a height H along an inclined smooth surface is A (in Joules) and the energy the it takes to push the same box through zig-zag to the same height H is B (also in Joules). These works are related as",
+    "choices": [
+      "A>B",
+      "A=B",
+      "B>A",
+      "none of these"
+    ],
+    "correctIndex": 1
+  },
+  {
+    "stem": "A box has initial kinetic energy and climbs on a rough inclined surface of angle Z with friction coefficient k. When the box comes to a full stop, the net height difference covered will only be dependent on",
+    "choices": [
+      "the initial energy, k and Z",
+      "k and Z only",
+      "more information is needed"
+    ],
+    "correctIndex": 0
+  },
+  {
+    "stem": "A box has initial kinetic energy and climbs on a rough inclined surface of angle Z with friction coefficient k. When the box comes to a full stop, the total distance covered on the inlined surface will only be dependent on",
+    "choices": [
+      "the initial energy, Z and k",
+      "k and Z only",
+      "more information is needed"
+    ],
+    "correctIndex": 0
+  },
+  {
+    "stem": "Two boxes collide on a frictionless horizontal surface and move as one aka plastic collision. The system ______momentum and ________kinetic energy",
+    "choices": [
+      "conserves, conserves",
+      "conserves, does not conserve",
+      "does not conserve, does not conserve",
+      "none of these apply"
+    ],
+    "correctIndex": 1
+  },
+  {
+    "stem": "During the collision of unknown restitution between two objects on a smooth inclined surface the kinetic energy of the two object system before, during and after the collision is",
+    "choices": [
+      "conserved",
+      "not conserved",
+      "more information is needed"
+    ],
+    "correctIndex": 1
+  },
+  {
+    "stem": "A ball is bouncing vertically on the ground with restitution of about 0.5. The system's ball+ground kinetic energy is conserved",
+    "choices": [
+      "before during and after the collision",
+      "before the collision",
+      "during the collision",
+      "after the collision",
+      "none of the apply"
+    ],
+    "correctIndex": 2
+  },
+  {
+    "stem": "A box is sliding down a smooth wedge that can also move on a frictionless horizontal surface. The total energy (kinetic+potential) of the box as it slides down",
+    "choices": [
+      "is conserved",
+      "is not conserved"
+    ],
+    "correctIndex": 1
+  },
+  {
+    "stem": "A box is sliding down a smooth wedge that can also move on a frictionless horizontal surface. The total energy (kinetic+potential) of the box+wedge system",
+    "choices": [
+      "is conserved",
+      "is not conserved"
+    ],
+    "correctIndex": 0
+  }
+];
+
+const els = {
+  progress: document.getElementById('q2_progress'),
+  stem: document.getElementById('q2_stem'),
+  options: document.getElementById('q2_options'),
+  feedback: document.getElementById('q2_feedback'),
+  restart: document.getElementById('q2_restart'),
+};
+
+let idx = 0;
+let score = 0;
+
+function render() {
+  const total = quiz2.length;
+  els.progress.textContent = `Question ${idx+1} of ${total}  ·  Score: ${score}/${total}`;
+  els.stem.textContent = quiz2[idx].stem;document.getElementById('progress-bar').style.width=((idx)/quiz2.length*100)+'%';
+  els.options.innerHTML = '';
+  els.feedback.textContent='';els.feedback.className='';
+
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  quiz2[idx].choices.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'q2_option';
+    btn.type = 'button';
+    btn.innerHTML = `<strong>${letters[i]})</strong> ${text}`;
+    btn.addEventListener('click', () => handleChoice(i));
+    els.options.appendChild(btn);
+  });
+}
+
+function handleChoice(i) {
+  const correct = quiz2[idx].correctIndex;
+  if (i === correct) {
+    score++;
+    els.feedback.className='correct';els.feedback.textContent='Correct.';
+    setTimeout(() => {
+      idx++;
+      if (idx < quiz2.length) {
+        render();
+      } else {
+        els.progress.textContent = `Completed · Final Score: ${score}/${quiz2.length}`;
+        els.stem.textContent = 'Quiz finished.';
+        els.options.innerHTML = '';
+        els.feedback.textContent = 'Press Restart to try again.';
+      }
+    }, 600);
+  } else {
+    els.feedback.className='incorrect';els.feedback.textContent='Incorrect — restarting from Question 1…';
+    setTimeout(() => { idx = 0; score = 0; render(); }, 700);
+  }
+}
+
+els.restart.addEventListener('click', () => { idx = 0; score = 0; render(); });
+render();
+</script>
+</body>
+</html>
